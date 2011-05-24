@@ -3,17 +3,17 @@
 :- initialization(start_backend).
 
 start_backend :- 
-    File = 'data/default.pl'
-    consult(File),
+    File = 'data/default.pl',
+    (file_exists(File) -> consult(File) ; true),
     open(File, append, S),
     add_stream_alias(S, data_file).
 
 tables([wlist, witem]).
 
 check_valid(X) :-
-    X=..[Tab|Row], 
+    X=..[Tab|_], 
     tables(Tabs),
-    memberchk(T,Tabs).
+    memberchk(Tab,Tabs).
 
 backend(query(X)) :-
     check_valid(X),
