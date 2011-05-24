@@ -1,12 +1,2 @@
 assert(wlist(hely)).
-assert(wlist('_query')).
-retract(wlist('_query')).
-query(wlist(hely)).
-query(wlist(hely)).
-query(wlist(hely)).
-query(wlist(hely)).
-query(wlist(hely)).
 assert(witem(hely,amerika)).
-query(witem(hely,amerika)).
-query(wlist(hely)).
-query(witem(hely,amerika)).

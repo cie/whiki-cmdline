@@ -32,7 +32,7 @@ backend_nowrite(X) :-
 
 backend(X) :-
     backend_nowrite(X),
-    backend_write(X).
+    (X \= query(_) -> backend_write(X); true).
 
 backend_execute(query(R)) :- R.
 backend_execute(assert(R)) :- assertz(R).
