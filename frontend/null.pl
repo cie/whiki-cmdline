@@ -1,7 +1,7 @@
 loop :- main_loop; write(':)'),nl, true.
 main_loop :-
     repeat,
-    read(X),
+    catch(read(X), E, (write(E), nl, fail)),
     (
         X==end_of_file -> ! 
     ;
