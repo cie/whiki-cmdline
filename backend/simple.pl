@@ -1,6 +1,8 @@
 
-:- dynamic(wlist/1, witem/2).
 :- initialization(start_backend).
+
+tables([wlist/1, witem/2, wpar/2, wrel/1]).
+:- dynamic(wlist/1, witem/2, wpar/2, wrel/1).
 
 start_backend :- 
     File = 'data/default.pl',
@@ -17,20 +19,20 @@ load_data(File) :-
         backend_nowrite(X), fail),
     close(S).
 
-tables([wlist, witem]).
 
 check_valid(X) :-
     X=..[Cmd,Row],
     memberchk(Cmd, [query,assert,retract]),
-    Row=..[Tab|_], 
+    Row=..[Tab|Fields], 
     tables(Tabs),
-    memberchk(Tab,Tabs).
+    memberchk(Tab/Arity,Tabs),
+    length(Fields, Arity).
 
 backend_nowrite(X) :-
     check_valid(X),
     backend_execute(X).
 
-backend(X) :-
+@(X) :-
     backend_nowrite(X),
     (X \= query(_) -> backend_write(X); true).
 
@@ -41,7 +43,8 @@ backend_execute(retract(R)) :- retract(R).
 backend_write(Term) :-
     write_canonical(data_file, Term),
     write(data_file, '.'),
-    nl(data_file).
+    nl(data_file),
+    flush_output(data_file).
     
 
 commit :- close(data_file).
