@@ -7,10 +7,10 @@
 ?add_list(L) :- \+ @query(wlist(L)), @assert(wlist(L)).
 ?items(L) :-  @query(wlist(L)), (@query(witem(L,I)), \+ @query(wpar(_,I)), write(I), nl, write_descendants(I,1), fail; true).
 ?items(L, I) :-  @query(witem(L,I)), write(I), nl, write_descendants(I,1).
-?add_item(L,I) :- \+ @query(witem(L,I)), @assert(witem(L,I)).
-?add_item(L,P,A) :- ?add_item(L,A), ?add_par(P,A).
+?add_item(L,I) :- \+ @query(witem(_,I)), @assert(witem(L,I)).
+?add_item(L,P,I) :- \+ @query(witem(_,I)), @query(witem(L,P)), @assert(witem(L,I)), @assert(wpar(P,I)).
 ?add_par(A,B) :-  @query(witem(L,A)), @query(witem(L,B)), \+ @query(wpar(A,B)), \+ @query(wpar(B,A)), @assert(wpar(A,B)).
-?descendants(I) :- write_descendants(I,0).
+?descendants(I) :- @query(witem(_,I)), write_descendants(I,0).
 write_descendants(I,N) :- N1 is N+1, @query(wpar(I,C)), indent(N), write(C), nl, write_descendants(C, N1), fail;true.
 
 ?add_descendant(P,A) :- @query(witem(L,P)), ?add_item(L,P,A).
