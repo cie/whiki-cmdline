@@ -71,17 +71,16 @@ relation_complement(Rel1, Rel) :-
 
 
 lookup_rels(Items, LQuery) :-
-    itemset_rel(Items,Rel),
-    writeall(R, 
-    (
-        ancestor_or_descendant_rel(Rel,Rel1),
-        rel_pattern(Rel1,Pattern),
-        findall(L, @query(wlist(L)), Lists),
-        nth(N,Lists,LQuery),
-        relation(Pattern),
-        nth(N,Pattern,R),
-        \+var(R)
-    )).
+    ancestors_or_descendants(Items, AOrD, Descendants),
+    itemset_rel(AOrD,Rel),
+    rel_pattern(Rel,Pattern),
+    findall(L, @query(wlist(L)), Lists),
+    nth(N,Lists,LQuery),
+    relation(Pattern),
+    nth(N,Pattern,R),
+    \+var(R),
+    write(R), write_bracketed_list(Descendants), nl,
+    fail;true.
 ?Rels :- Rels =.. [rels|T], append(Items, [LQuery], T), Items=[_|_], lookup_rels(Items, LQuery).
 
 
@@ -91,6 +90,19 @@ ancestor(P,I) :- @query(wpar(C,I)), ancestor(P,C).
 ancestor_or_descendant_rel([],[]).
 ancestor_or_descendant_rel([''|T1],[''|T]) :- ancestor_or_descendant_rel(T1,T).
 ancestor_or_descendant_rel([R1|T1],[R|T]) :- R1\=='', (R1=R;ancestor(R1,R);ancestor(R,R1)), ancestor_or_descendant_rel(T1,T).
+
+
+ancestors_or_descendants([],[],[]).
+ancestors_or_descendants([A1|T1],[A|T],Descendants) :-
+    (ancestor(A,A1), D1=[]; ancestor(A1,A), D1=[A]),
+    ancestors_or_descendants(T1, T, Desc),
+    append(D1, Desc, Descendants).
+
+
+write_bracketed_list([]).
+write_bracketed_list([A|B]) :- write(' ('), write_comma_list([A|B]), write(')').
+write_comma_list([A]) :- write(A).
+write_comma_list([A,B|T]) :- write(A), write(', '), write_comma_list([B|T]).
 
 
 relation(Rel) :-
