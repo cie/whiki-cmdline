@@ -71,38 +71,61 @@ relation_complement(Rel1, Rel) :-
 
 
 lookup_rels(Items, LQuery) :-
-    ancestors_or_descendants(Items, AOrD, Descendants),
+    findall(R,relation(R),Rels),
+    findall(Sol/Links, solution(Rels, Items, LQuery, Sol, Links), SolsLinks),
+    (
+        setof(Sol/UnifiedLinks, (
+            setof(L, member(Sol/L, SolsLinks), UnifiedLinks) 
+        ), SolsLinks1)
+    ;
+        SolsLinks1 = []
+    ),
+    (member(R/Links, SolsLinks1), write(R), write_bracketed_list_list(Links), nl, fail;true).
+?Rels :- Rels =.. [rels|T], append(Items, [LQuery], T), Items=[_|_], lookup_rels(Items, LQuery).
+
+solution(Rels, Items, LQuery, Sol, Links) :-
+    ancestors_or_descendants(Items, AOrD, Links),
     itemset_rel(AOrD,Rel),
     rel_pattern(Rel,Pattern),
     findall(L, @query(wlist(L)), Lists),
     nth(N,Lists,LQuery),
-    relation(Pattern),
-    nth(N,Pattern,R),
-    \+var(R),
-    write(R), write_bracketed_list(Descendants), nl,
-    fail;true.
-?Rels :- Rels =.. [rels|T], append(Items, [LQuery], T), Items=[_|_], lookup_rels(Items, LQuery).
-
+    member(Pattern,Rels),
+    nth(N,Pattern,Sol),
+    \+var(Sol).
 
 ancestor(P,I) :- @query(wpar(P,I)).
 ancestor(P,I) :- @query(wpar(C,I)), ancestor(P,C).
 
-ancestor_or_descendant_rel([],[]).
-ancestor_or_descendant_rel([''|T1],[''|T]) :- ancestor_or_descendant_rel(T1,T).
-ancestor_or_descendant_rel([R1|T1],[R|T]) :- R1\=='', (R1=R;ancestor(R1,R);ancestor(R,R1)), ancestor_or_descendant_rel(T1,T).
+
+ancestors_of(L,Ancs) :-
+    setof(I,A^(member(A,L),@query(wpar(I,A))),Parents),
+    ancestors_of(Parents, GrandAncs),
+    setof(I,(member(I,Parents); member(I,GrandAncs)),Ancs),!.
+ancestors_of(_,[]).
+
+descendants_of(L,Descs) :-
+    setof(I,A^(member(A,L),@query(wpar(A,I))),Children),
+    descendants_of(Children, GrandDescs),
+    setof(I,(member(I,Children); member(I,GrandDescs)),Descs),!.
+descendants_of(_,[]).
 
 
 ancestors_or_descendants([],[],[]).
+ancestors_or_descendants([A1|T1],[A1|T],Descendants) :-
+    ancestors_or_descendants(T1,T,Descendants).
 ancestors_or_descendants([A1|T1],[A|T],Descendants) :-
-    (ancestor(A,A1), D1=[]; ancestor(A1,A), D1=[A]),
-    ancestors_or_descendants(T1, T, Desc),
-    append(D1, Desc, Descendants).
+    (ancestors_of([A1],Ancs), member(A,Ancs), D1=[]; descendants_of([A1],Descs), member(A,Descs), D1=[A]),
+    ancestors_or_descendants(T1, T, DescList),
+    append(D1, DescList, Descendants).
 
 
-write_bracketed_list([]).
-write_bracketed_list([A|B]) :- write(' ('), write_comma_list([A|B]), write(')').
-write_comma_list([A]) :- write(A).
-write_comma_list([A,B|T]) :- write(A), write(', '), write_comma_list([B|T]).
+write_bracketed_list_list([]).
+write_bracketed_list_list([A|B]) :- write(' ('), write_comma_list_list([A|B]), write(')').
+write_comma_list_list([A]) :- write_list(A).
+write_comma_list_list([A,B|T]) :- write_list(A), write(', '), write_comma_list([B|T]).
+write_list([]).
+write_list([A]) :- write(A).
+write_list([A,B|T]) :- write(A), write('/'), write_list([B|T]).
 
 
 relation(Rel) :-
@@ -158,4 +181,6 @@ count(Goal, N) :-
  * R = [mexico,_,carlos_fuentes,galaicoportugues,edad_media] ? ; !!!!!!!!
  * Őrült baromság. Mi az értelmezése a virtuális relációs tábláinknak és az
  * egyesített relációs táblánknak?
+ * Magyarázat: [galaicoportugues, edad_media] nem jó, meg kell mondani, hogy hol
+ *             [mexico,carlos_fuentes] nem jó, meg kell mondani, hogy mikor
  */
