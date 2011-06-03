@@ -89,7 +89,8 @@ ancestor(P,I) :- @query(wpar(P,I)).
 ancestor(P,I) :- @query(wpar(C,I)), ancestor(P,C).
 
 ancestor_or_descendant_rel([],[]).
-ancestor_or_descendant_rel([R1|T1],[R|T]) :- (R1=R;ancestor(R1,R);ancestor(R,R1)), ancestor_or_descendant_rel(T1,T).
+ancestor_or_descendant_rel([''|T1],[''|T]) :- ancestor_or_descendant_rel(T1,T).
+ancestor_or_descendant_rel([R1|T1],[R|T]) :- R1\=='', (R1=R;ancestor(R1,R);ancestor(R,R1)), ancestor_or_descendant_rel(T1,T).
 
 
 relation(Rel) :-
