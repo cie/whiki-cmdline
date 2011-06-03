@@ -4,8 +4,10 @@
 tables([wlist/1, witem/2, wpar/2, wrel/1]).
 :- dynamic(wlist/1, witem/2, wpar/2, wrel/1).
 
-start_backend :- 
-    File = 'data/default.pl',
+start_backend :-
+    (argument_list([File|_]) ; write('Usage: whiki <dbfile>'), nl, fail),
+    start_backend(File).
+start_backend(File) :- 
     (file_exists(File) -> load_data(File) ; true),
     open(File, append, S),
     add_stream_alias(S, data_file).

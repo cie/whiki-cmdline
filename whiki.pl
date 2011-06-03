@@ -2,5 +2,5 @@
 :- include('include/utils.pl').
 :- include('config.pl').
 :- include('engine/engine.pl').
-:- initialization(main).
+%:- initialization(main).
 main :- loop, commit, halt.

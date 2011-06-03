@@ -1,3 +1,6 @@
 #!/bin/sh
-
-gprolog --init-goal "['whiki.pl']"
+if [ $# '!=' 1 ] ; then 
+    echo "Usage: whiki <dbfile>"
+    exit 1
+fi
+gprolog "$@" --init-goal "['whiki.pl'], main" 

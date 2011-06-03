@@ -5,6 +5,6 @@ main_loop :-
     (
         X==end_of_file -> ! 
     ;
-        \+ catch(?X, E, (write(E),nl)) ->
+        \+ catch(X, E, (write(E),nl)) ->
             write(failed), nl
     ), fail.
