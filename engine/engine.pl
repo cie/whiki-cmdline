@@ -5,6 +5,7 @@
 
 ?lists :- writeall(L, @query(wlist(L))).
 ?add_list(L) :- \+ @query(wlist(L)), @assert(wlist(L)).
+?items :- (@query(wlist(L)), write(L), nl, @query(witem(L,I)), \+ @query(wpar(_,I)), indent(1), write(I), nl, write_descendants(I,2), fail; true).
 ?items(L) :-  @query(wlist(L)), (@query(witem(L,I)), \+ @query(wpar(_,I)), write(I), nl, write_descendants(I,1), fail; true).
 ?items(L, I) :-  @query(witem(L,I)), write(I), nl, write_descendants(I,1).
 ?add_item(L,I) :- \+ @query(witem(_,I)), @assert(witem(L,I)).
@@ -163,6 +164,7 @@ relation(Rel) :-
 ?re :- ?reload.
 ?l :- ?lists.
 ?al(L) :- ?add_list(L).
+?i :- ?items.
 ?i(L) :- ?items(L).
 ?i(L,I) :- ?items(L,I).
 ?ai(L,I) :- ?add_item(L,I).
