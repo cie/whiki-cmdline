@@ -17,7 +17,7 @@ write_descendants(I,N) :- N1 is N+1, @query(wpar(I,C)), indent(N), write(C), nl,
 
 ?add_descendant(P,A) :- @query(witem(L,P)), ?add_item(L,P,A).
 ?del_par(A,B) :- @retract(wpar(A,B)).
-?del_item(A) :- \+ @query(wpar(_,A)), \+ @query(wpar(A,_)), \+ (@query(wrel(X)), member(_:A, X)), @retract(witem(_,A)).
+?del_item(A) :- \+ @query(wpar(_,A)), \+ @query(wpar(A,_)), \+ (@query(wrel(X)), member(A, X)), @retract(witem(_,A)).
 ?ancestors(A) :- @query(witem(_,A)), (@query(wpar(B,A)), write(B), nl, ?ancestors(B), fail; true).
 ?add_rel(R) :- R=[_,_|_],
     itemset_rel(R,Rel),
@@ -54,12 +54,21 @@ relation_complement(Rel1, Rel) :-
     times(N0, '', L),
     append(Rel1, L, Rel).
 
+relation_truncate([],[]).
+relation_truncate([''|T1],T) :- relation_truncate(T1,T).
+relation_truncate([A|T1], [A|T]) :- A \== '', relation_truncate(T1,T).
+
+
 
 
 ?rels(A) :-
     itemset_rel([A],Rel),
     rel_pattern(Rel, Pattern),
-    writeall(Pattern, (@query(wrel(R)), relation_complement(R,Pattern)) ).
+    @query(wrel(R)),
+    relation_complement(R,Pattern),
+    relation_truncate(Pattern,Line),
+    write('('), write_list(Line, ', '), write(')'), nl,
+    fail;true.
 
 
 %truncate([],[]).
@@ -121,11 +130,11 @@ ancestors_or_descendants([A1|T1],[A|T],Descendants) :-
 
 write_bracketed_list_list([]).
 write_bracketed_list_list([A|B]) :- write(' ('), write_comma_list_list([A|B]), write(')').
-write_comma_list_list([A]) :- write_list(A).
-write_comma_list_list([A,B|T]) :- write_list(A), write(', '), write_comma_list([B|T]).
-write_list([]).
-write_list([A]) :- write(A).
-write_list([A,B|T]) :- write(A), write('/'), write_list([B|T]).
+write_comma_list_list([A]) :- write_list(A,'/').
+write_comma_list_list([A,B|T]) :- write_list(A,'/'), write(', '), write_comma_list_list([B|T]).
+write_list([],_).
+write_list([A],_) :- write(A).
+write_list([A,B|T],Sep) :- write(A), write(Sep), write_list([B|T], Sep).
 
 
 relation(Rel) :-
@@ -141,6 +150,13 @@ relation(Rel) :-
 ?rels :- writeall(Rel, @query(wrel(Rel))).
 
 
+?del_rel(L) :- 
+    itemset_rel(L,R),
+    @query(wrel(DbRel)),
+    relation_complement(DbRel, R),
+    @retract(wrel(DbRel)).
+
+?DelRel :- DelRel =.. [del_rel,A,B|T], ?del_rel([A,B|T]).
 
 
 
@@ -164,6 +180,7 @@ relation(Rel) :-
 ?r(A) :- ?rels(A).
 ?r :- ?rels.
 ?rr :- ?allrels.
+?DR :- DR =.. [dr,A,B|T], ?del_rel([A,B|T]).
 
 
 

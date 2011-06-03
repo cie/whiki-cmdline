@@ -471,3 +471,7 @@ assert(wrel('.'(chile,'.'('','.'('','.'('','.'('','.'('','.'('','.'('','.'('','.
 assert(witem(proceso,voseo_chileno)).
 assert(wrel('.'(chile,'.'('','.'('','.'('','.'('','.'('','.'('','.'('','.'('','.'('','.'(voseo_chileno,[]))))))))))))).
 assert(wrel('.'(espana,'.'('','.'('','.'(espanol,'.'('','.'('','.'('','.'('','.'('','.'('','.'('',[]))))))))))))).
+retract(wrel('.'('','.'('','.'('','.'(galaicoportugues,'.'(edad_media,[]))))))).
+assert(witem(lugar,galicia)).
+assert(wpar(espana,galicia)).
+assert(wrel('.'(galicia,'.'('','.'('','.'(galaicoportugues,'.'(edad_media,'.'('','.'('','.'('','.'('','.'('','.'('',[]))))))))))))).
